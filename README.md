@@ -37,8 +37,14 @@ go build -o loopback-manager
 # List all repositories
 loopback-manager list
 
+# List with JSON output (for scripting)
+loopback-manager list --json
+
 # Scan for unassigned repositories
 loopback-manager scan
+
+# Scan with JSON output
+loopback-manager scan --json
 
 # Manually assign IP
 loopback-manager assign myorg/myrepo
