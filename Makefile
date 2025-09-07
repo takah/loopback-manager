@@ -2,7 +2,7 @@
 
 BINARY_NAME=loopback-manager
 VERSION := $(shell git describe --tags --always --dirty)
-LDFLAGS := -ldflags "-X main.version=$(VERSION)"
+LDFLAGS := -ldflags "-X github.com/takah/loopback-manager/cmd.version=$(VERSION)"
 
 build:
 	go build $(LDFLAGS) -o $(BINARY_NAME) .

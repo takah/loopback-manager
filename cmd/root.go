@@ -14,6 +14,7 @@ import (
 var (
 	cfgFile string
 	mgr     *manager.Manager
+	version = "dev" // This will be overridden by ldflags during build
 )
 
 var rootCmd = &cobra.Command{
@@ -112,6 +113,14 @@ var checkCmd = &cobra.Command{
 	},
 }
 
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Show version information",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Printf("loopback-manager version %s\n", version)
+	},
+}
+
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -133,6 +142,7 @@ func init() {
 	rootCmd.AddCommand(scanCmd)
 	rootCmd.AddCommand(autoAssignCmd)
 	rootCmd.AddCommand(checkCmd)
+	rootCmd.AddCommand(versionCmd)
 }
 
 func initConfig() {
