@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/takah/loopback-manager/internal/config"
+	"github.com/takah/loopback-manager/internal/network"
 )
 
 type Manager struct {
@@ -404,4 +405,105 @@ func (m *Manager) updateEnvFile(repoPath, ip string) error {
 	}
 	
 	return ioutil.WriteFile(envFile, []byte(content), 0644)
+}
+
+// ListHostLoopback lists all configured loopback addresses on the host
+func (m *Manager) ListHostLoopback(jsonOutput bool) error {
+	addresses, err := network.GetHostLoopbackAddresses()
+	if err != nil {
+		return fmt.Errorf("failed to get host loopback addresses: %w", err)
+	}
+
+	if jsonOutput {
+		output, err := json.MarshalIndent(addresses, "", "  ")
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(output))
+		return nil
+	}
+
+	if len(addresses) == 0 {
+		fmt.Println("No additional loopback addresses configured on host.")
+		fmt.Println("(127.0.0.1 is excluded as it's the default loopback)")
+		return nil
+	}
+
+	fmt.Printf("Host Loopback Addresses:\n")
+	fmt.Printf("%-20s %s\n", "Interface", "IP Address")
+	fmt.Println(strings.Repeat("-", 40))
+	
+	for _, addr := range addresses {
+		fmt.Printf("%-20s %s\n", addr.Interface, addr.IP)
+	}
+	
+	return nil
+}
+
+// SyncCheck checks consistency between assignments and host configuration
+func (m *Manager) SyncCheck() error {
+	// Get host loopback addresses
+	hostAddresses, err := network.GetHostLoopbackAddresses()
+	if err != nil {
+		return fmt.Errorf("failed to get host loopback addresses: %w", err)
+	}
+
+	// Create a map of configured addresses
+	hostIPMap := make(map[string]bool)
+	for _, addr := range hostAddresses {
+		hostIPMap[addr.IP] = true
+	}
+
+	// Check which assigned IPs are not configured on host
+	var missingIPs []string
+	assignedIPs := make(map[string]string) // IP -> repo mapping
+	
+	for repo, ip := range m.assignments {
+		assignedIPs[ip] = repo
+		if !hostIPMap[ip] {
+			missingIPs = append(missingIPs, ip)
+		}
+	}
+
+	// Sort for consistent output
+	sort.Strings(missingIPs)
+
+	// Report status
+	fmt.Println("=== Loopback Address Consistency Check ===\n")
+	
+	fmt.Printf("Assigned addresses in config: %d\n", len(m.assignments))
+	fmt.Printf("Loopback addresses on host:   %d\n", len(hostAddresses))
+	fmt.Println()
+
+	if len(missingIPs) == 0 {
+		fmt.Println("✓ All assigned IP addresses are configured on the host.")
+		return nil
+	}
+
+	fmt.Printf("⚠ Found %d assigned IP addresses not configured on host:\n\n", len(missingIPs))
+	
+	for _, ip := range missingIPs {
+		repo := assignedIPs[ip]
+		fmt.Printf("  %s (assigned to %s)\n", ip, repo)
+	}
+
+	fmt.Println("\n=== Configuration Commands ===\n")
+	fmt.Println("To add these loopback addresses to your host:")
+	fmt.Println()
+	
+	// Show NetworkManager commands
+	fmt.Println("Using NetworkManager (if available):")
+	nmcliCommands := network.GenerateNmcliCommands(missingIPs)
+	for _, cmd := range nmcliCommands {
+		fmt.Printf("  %s\n", cmd)
+	}
+	
+	fmt.Println("\nAlternatively, using ip command directly:")
+	for _, ip := range missingIPs {
+		fmt.Printf("  sudo ip addr add %s/32 dev lo\n", ip)
+	}
+	
+	fmt.Println("\nNote: These changes may not persist after reboot without proper configuration.")
+	
+	return nil
 }
