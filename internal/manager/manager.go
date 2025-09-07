@@ -170,7 +170,7 @@ func (m *Manager) Remove(org, repo string) error {
 	return nil
 }
 
-func (m *Manager) AutoAssign() error {
+func (m *Manager) AutoAssign(execute bool) error {
 	unassigned := m.getUnassignedRepositories()
 	
 	if len(unassigned) == 0 {
@@ -178,16 +178,52 @@ func (m *Manager) AutoAssign() error {
 		return nil
 	}
 	
-	fmt.Printf("Assigning IPs to %d repositories...\n\n", len(unassigned))
+	if !execute {
+		fmt.Println("DRY RUN MODE - No changes will be made")
+		fmt.Println("To execute, run with --execute flag")
+		fmt.Println()
+	}
 	
+	fmt.Printf("Found %d unassigned repositories:\n\n", len(unassigned))
+	
+	usedIPs := make(map[string]bool)
+	for _, ip := range m.assignments {
+		usedIPs[ip] = true
+	}
+	
+	nextIP := m.config.IPRange.Start
 	for _, repo := range unassigned {
-		ip := m.getNextAvailableIP()
-		if err := m.Assign(repo.Org, repo.Name, ip); err != nil {
-			return fmt.Errorf("failed to assign IP to %s/%s: %v", repo.Org, repo.Name, err)
+		// Find next available IP
+		var ip string
+		for i := nextIP; i <= m.config.IPRange.End; i++ {
+			candidateIP := fmt.Sprintf("%s.%d", m.config.IPRange.Base, i)
+			if !usedIPs[candidateIP] {
+				ip = candidateIP
+				nextIP = i + 1
+				break
+			}
+		}
+		
+		if ip == "" {
+			return fmt.Errorf("no more available IPs in range")
+		}
+		
+		if execute {
+			if err := m.Assign(repo.Org, repo.Name, ip); err != nil {
+				return fmt.Errorf("failed to assign IP to %s/%s: %v", repo.Org, repo.Name, err)
+			}
+		} else {
+			fmt.Printf("  Would assign %s to %s/%s\n", ip, repo.Org, repo.Name)
+			usedIPs[ip] = true // Mark as used for dry run calculation
 		}
 	}
 	
-	fmt.Println("\nAll repositories have been assigned IPs.")
+	if execute {
+		fmt.Println("\nAll repositories have been assigned IPs.")
+	} else {
+		fmt.Printf("\nDRY RUN COMPLETE - Would assign %d IPs\n", len(unassigned))
+		fmt.Println("To execute these assignments, run: loopback-manager auto-assign --execute")
+	}
 	return nil
 }
 

@@ -89,10 +89,11 @@ var scanCmd = &cobra.Command{
 
 var autoAssignCmd = &cobra.Command{
 	Use:   "auto-assign",
-	Short: "Auto-assign IPs to all unassigned repositories",
+	Short: "Auto-assign IPs to all unassigned repositories (dry-run by default)",
 	Aliases: []string{"auto"},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := mgr.AutoAssign(); err != nil {
+		execute, _ := cmd.Flags().GetBool("execute")
+		if err := mgr.AutoAssign(execute); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
@@ -124,6 +125,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/loopback-manager/config.yaml)")
 	
 	assignCmd.Flags().StringP("ip", "i", "", "Specific IP address to assign")
+	autoAssignCmd.Flags().BoolP("execute", "e", false, "Execute the assignments (without this flag, only shows what would be done)")
 	
 	rootCmd.AddCommand(listCmd)
 	rootCmd.AddCommand(assignCmd)

@@ -40,8 +40,11 @@ loopback-manager assign myorg/myrepo
 # Assign with specific IP
 loopback-manager assign myorg/myrepo --ip 127.0.0.50
 
-# Auto-assign IP to all unassigned repositories
+# Auto-assign IP to all unassigned repositories (dry-run by default)
 loopback-manager auto-assign
+
+# Execute the auto-assignment (actually make changes)
+loopback-manager auto-assign --execute
 
 # Check for duplicates
 loopback-manager check
