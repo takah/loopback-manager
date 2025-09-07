@@ -35,7 +35,8 @@ var listCmd = &cobra.Command{
 	Short: "List all IP assignments",
 	Aliases: []string{"ls"},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := mgr.List(); err != nil {
+		jsonOutput, _ := cmd.Flags().GetBool("json")
+		if err := mgr.List(jsonOutput); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
@@ -82,7 +83,8 @@ var scanCmd = &cobra.Command{
 	Use:   "scan",
 	Short: "Scan for unassigned repositories",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := mgr.Scan(); err != nil {
+		jsonOutput, _ := cmd.Flags().GetBool("json")
+		if err := mgr.Scan(jsonOutput); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
@@ -150,6 +152,8 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/loopback-manager/config.yaml)")
 	
+	listCmd.Flags().BoolP("json", "j", false, "Output in JSON format")
+	scanCmd.Flags().BoolP("json", "j", false, "Output in JSON format")
 	assignCmd.Flags().StringP("ip", "i", "", "Specific IP address to assign")
 	autoAssignCmd.Flags().BoolP("execute", "e", false, "Execute the assignments (without this flag, only shows what would be done)")
 	

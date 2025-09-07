@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -18,9 +19,9 @@ type Manager struct {
 }
 
 type Repository struct {
-	Org  string
-	Name string
-	IP   string
+	Org  string `json:"org"`
+	Name string `json:"name"`
+	IP   string `json:"ip,omitempty"`
 }
 
 func New(cfg *config.Config) *Manager {
@@ -82,8 +83,17 @@ func (m *Manager) saveAssignments() error {
 	return ioutil.WriteFile(m.dataFile, []byte(data), 0644)
 }
 
-func (m *Manager) List() error {
+func (m *Manager) List(jsonOutput bool) error {
 	repos := m.getAllRepositories()
+	
+	if jsonOutput {
+		output, err := json.MarshalIndent(repos, "", "  ")
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(output))
+		return nil
+	}
 	
 	if len(repos) == 0 {
 		fmt.Println("No repositories found.")
@@ -95,18 +105,28 @@ func (m *Manager) List() error {
 	
 	for _, repo := range repos {
 		status := "✓ Assigned"
+		ipDisplay := repo.IP
 		if repo.IP == "" {
 			status = "✗ Not assigned"
-			repo.IP = "-"
+			ipDisplay = "-"
 		}
-		fmt.Printf("%-30s %-15s %s\n", fmt.Sprintf("%s/%s", repo.Org, repo.Name), repo.IP, status)
+		fmt.Printf("%-30s %-15s %s\n", fmt.Sprintf("%s/%s", repo.Org, repo.Name), ipDisplay, status)
 	}
 	
 	return nil
 }
 
-func (m *Manager) Scan() error {
+func (m *Manager) Scan(jsonOutput bool) error {
 	unassigned := m.getUnassignedRepositories()
+	
+	if jsonOutput {
+		output, err := json.MarshalIndent(unassigned, "", "  ")
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(output))
+		return nil
+	}
 	
 	if len(unassigned) == 0 {
 		fmt.Println("All repositories have IP assignments.")
