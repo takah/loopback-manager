@@ -12,6 +12,12 @@ A loopback IP address management tool for Docker Compose in GitHub organization 
 
 ## Installation
 
+### Using Go Install
+If you have Go environment set up (Go 1.19 or later), you can install directly:
+```bash
+go install github.com/takah/loopback-manager@latest
+```
+
 ### Binary Download
 ```bash
 # Run installation script
