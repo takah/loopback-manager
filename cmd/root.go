@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -40,12 +41,17 @@ var listCmd = &cobra.Command{
 }
 
 var assignCmd = &cobra.Command{
-	Use:   "assign <org> <repo>",
+	Use:   "assign <org/repo>",
 	Short: "Assign IP to repository",
-	Args:  cobra.ExactArgs(2),
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		parts := strings.SplitN(args[0], "/", 2)
+		if len(parts) != 2 {
+			fmt.Fprintf(os.Stderr, "Error: Invalid format. Use: org/repo\n")
+			os.Exit(1)
+		}
 		ip, _ := cmd.Flags().GetString("ip")
-		if err := mgr.Assign(args[0], args[1], ip); err != nil {
+		if err := mgr.Assign(parts[0], parts[1], ip); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}
@@ -53,12 +59,17 @@ var assignCmd = &cobra.Command{
 }
 
 var removeCmd = &cobra.Command{
-	Use:   "remove <org> <repo>",
+	Use:   "remove <org/repo>",
 	Short: "Remove IP assignment",
 	Aliases: []string{"rm", "del"},
-	Args:  cobra.ExactArgs(2),
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := mgr.Remove(args[0], args[1]); err != nil {
+		parts := strings.SplitN(args[0], "/", 2)
+		if len(parts) != 2 {
+			fmt.Fprintf(os.Stderr, "Error: Invalid format. Use: org/repo\n")
+			os.Exit(1)
+		}
+		if err := mgr.Remove(parts[0], parts[1]); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 			os.Exit(1)
 		}

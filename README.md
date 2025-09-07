@@ -35,10 +35,10 @@ loopback-manager list
 loopback-manager scan
 
 # Manually assign IP
-loopback-manager assign myorg myrepo
+loopback-manager assign myorg/myrepo
 
 # Assign with specific IP
-loopback-manager assign myorg myrepo --ip 127.0.0.50
+loopback-manager assign myorg/myrepo --ip 127.0.0.50
 
 # Auto-assign IP to all unassigned repositories
 loopback-manager auto-assign
@@ -47,7 +47,7 @@ loopback-manager auto-assign
 loopback-manager check
 
 # Remove IP assignment
-loopback-manager remove myorg myrepo
+loopback-manager remove myorg/myrepo
 ```
 
 ## Configuration
