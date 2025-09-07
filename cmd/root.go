@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"runtime/debug"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -117,8 +118,24 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Show version information",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("loopback-manager version %s\n", version)
+		fmt.Printf("loopback-manager version %s\n", getVersion())
 	},
+}
+
+func getVersion() string {
+	// First, check if version was set via ldflags (e.g., from Makefile)
+	if version != "dev" {
+		return version
+	}
+	
+	// If not, try to get version from build info (for go install)
+	if info, ok := debug.ReadBuildInfo(); ok {
+		if info.Main.Version != "" && info.Main.Version != "(devel)" {
+			return info.Main.Version
+		}
+	}
+	
+	return "dev"
 }
 
 func Execute() {
