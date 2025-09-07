@@ -500,7 +500,7 @@ func (m *Manager) SyncCheck() error {
 	
 	fmt.Println("\nAlternatively, using ip command directly:")
 	for _, ip := range missingIPs {
-		fmt.Printf("  sudo ip addr add %s/32 dev lo\n", ip)
+		fmt.Printf("  sudo ip addr add %s/8 dev lo\n", ip)
 	}
 	
 	fmt.Println("\nNote: These changes may not persist after reboot without proper configuration.")
