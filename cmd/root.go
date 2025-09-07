@@ -124,6 +124,31 @@ var versionCmd = &cobra.Command{
 	},
 }
 
+var hostListCmd = &cobra.Command{
+	Use:   "host-list",
+	Short: "List loopback addresses configured on the host",
+	Aliases: []string{"host-ls"},
+	Run: func(cmd *cobra.Command, args []string) {
+		jsonOutput, _ := cmd.Flags().GetBool("json")
+		if err := mgr.ListHostLoopback(jsonOutput); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+	},
+}
+
+var syncCheckCmd = &cobra.Command{
+	Use:   "sync-check",
+	Short: "Check consistency between assignments and host configuration",
+	Aliases: []string{"sync"},
+	Run: func(cmd *cobra.Command, args []string) {
+		if err := mgr.SyncCheck(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+	},
+}
+
 func getVersion() string {
 	// First, check if version was set via ldflags (e.g., from Makefile)
 	if version != "dev" {
@@ -154,6 +179,7 @@ func init() {
 	
 	listCmd.Flags().BoolP("json", "j", false, "Output in JSON format")
 	scanCmd.Flags().BoolP("json", "j", false, "Output in JSON format")
+	hostListCmd.Flags().BoolP("json", "j", false, "Output in JSON format")
 	assignCmd.Flags().StringP("ip", "i", "", "Specific IP address to assign")
 	autoAssignCmd.Flags().BoolP("execute", "e", false, "Execute the assignments (without this flag, only shows what would be done)")
 	
@@ -164,6 +190,8 @@ func init() {
 	rootCmd.AddCommand(autoAssignCmd)
 	rootCmd.AddCommand(checkCmd)
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(hostListCmd)
+	rootCmd.AddCommand(syncCheckCmd)
 }
 
 func initConfig() {

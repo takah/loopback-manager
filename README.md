@@ -63,6 +63,50 @@ loopback-manager check
 
 # Remove IP assignment
 loopback-manager remove myorg/myrepo
+
+# List loopback addresses configured on host
+loopback-manager host-list
+
+# List with JSON output
+loopback-manager host-list --json
+
+# Check consistency between assignments and host configuration
+loopback-manager sync-check
+```
+
+### Host Configuration Management
+
+The `sync-check` command verifies that all assigned IP addresses are configured on your host system:
+
+```bash
+# Check if assigned IPs are configured on host
+loopback-manager sync-check
+```
+
+If any assigned IPs are missing from the host configuration, the command will display:
+- List of missing IP addresses and their assigned repositories
+- NetworkManager commands (using `nmcli`) to add the addresses
+- Alternative `ip` commands for systems without NetworkManager
+
+Example output:
+```
+=== Loopback Address Consistency Check ===
+
+⚠ Found 2 assigned IP addresses not configured on host:
+
+  127.0.0.11 (assigned to org/repo1)
+  127.0.0.12 (assigned to org/repo2)
+
+=== Configuration Commands ===
+
+Using NetworkManager (if available):
+  sudo nmcli connection modify lo +ipv4.addresses 127.0.0.11/32
+  sudo nmcli connection modify lo +ipv4.addresses 127.0.0.12/32
+  sudo nmcli connection up lo
+
+Alternatively, using ip command directly:
+  sudo ip addr add 127.0.0.11/32 dev lo
+  sudo ip addr add 127.0.0.12/32 dev lo
 ```
 
 ## Configuration
