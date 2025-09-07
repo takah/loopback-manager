@@ -100,13 +100,13 @@ Example output:
 === Configuration Commands ===
 
 Using NetworkManager (if available):
-  sudo nmcli connection modify lo +ipv4.addresses 127.0.0.11/32
-  sudo nmcli connection modify lo +ipv4.addresses 127.0.0.12/32
+  sudo nmcli connection modify lo +ipv4.addresses 127.0.0.11/8
+  sudo nmcli connection modify lo +ipv4.addresses 127.0.0.12/8
   sudo nmcli connection up lo
 
 Alternatively, using ip command directly:
-  sudo ip addr add 127.0.0.11/32 dev lo
-  sudo ip addr add 127.0.0.12/32 dev lo
+  sudo ip addr add 127.0.0.11/8 dev lo
+  sudo ip addr add 127.0.0.12/8 dev lo
 ```
 
 ## Configuration

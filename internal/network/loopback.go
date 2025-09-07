@@ -119,7 +119,7 @@ func IsLoopbackConfigured(ip string) (bool, error) {
 
 // GenerateNmcliCommand generates an nmcli command to add a loopback address
 func GenerateNmcliCommand(ip string) string {
-	return fmt.Sprintf("sudo nmcli connection modify lo +ipv4.addresses %s/32", ip)
+	return fmt.Sprintf("sudo nmcli connection modify lo +ipv4.addresses %s/8", ip)
 }
 
 // GenerateNmcliCommands generates nmcli commands for multiple addresses
