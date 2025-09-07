@@ -1,58 +1,58 @@
 # Loopback Manager
 
-GitHub organization リポジトリのDocker Compose用loopback IPアドレス管理ツール
+A loopback IP address management tool for Docker Compose in GitHub organization repositories
 
-## 特徴
+## Features
 
-- 自動IP割り当て (127.0.0.10から順番)
-- IP重複チェック
-- 未割り当てリポジトリの自動検出
-- .env ファイルの自動生成・更新
-- 設定の永続化
+- Automatic IP assignment (starting from 127.0.0.10)
+- IP duplication check
+- Automatic detection of unassigned repositories
+- Automatic generation and update of .env files
+- Persistent configuration
 
-## インストール
+## Installation
 
-### バイナリダウンロード
+### Binary Download
 ```bash
-# インストールスクリプト実行
+# Run installation script
 curl -sf https://raw.githubusercontent.com/takah/loopback-manager/main/scripts/install.sh | bash
 ```
 
-### ソースからビルド
+### Build from Source
 ```bash
 git clone https://github.com/takah/loopback-manager.git
 cd loopback-manager
 go build -o loopback-manager
 ```
 
-## 使用方法
+## Usage
 
 ```bash
-# 全リポジトリの一覧表示
+# List all repositories
 loopback-manager list
 
-# 未割り当てリポジトリをスキャン
+# Scan for unassigned repositories
 loopback-manager scan
 
-# 手動でIPを割り当て
+# Manually assign IP
 loopback-manager assign myorg myrepo
 
-# 特定のIPを指定して割り当て
+# Assign with specific IP
 loopback-manager assign myorg myrepo --ip 127.0.0.50
 
-# 全ての未割り当てリポジトリに自動でIP割り当て
+# Auto-assign IP to all unassigned repositories
 loopback-manager auto-assign
 
-# 重複チェック
+# Check for duplicates
 loopback-manager check
 
-# IP割り当てを削除
+# Remove IP assignment
 loopback-manager remove myorg myrepo
 ```
 
-## 設定
+## Configuration
 
-デフォルトの設定ファイル: `~/.config/loopback-manager/config.yaml`
+Default configuration file: `~/.config/loopback-manager/config.yaml`
 
 ```yaml
 base_dir: "~/github"
@@ -62,9 +62,9 @@ ip_range:
   end: 254
 ```
 
-環境変数での設定:
-- `GITHUB_BASE_DIR`: GitHubリポジトリのベースディレクトリ
+Environment variable configuration:
+- `GITHUB_BASE_DIR`: Base directory for GitHub repositories
 
-## ライセンス
+## License
 
 MIT License
